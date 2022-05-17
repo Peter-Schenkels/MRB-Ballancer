@@ -33,15 +33,15 @@
 
     Uit het grafiek hierboven heb ik besloten dat ik voor een Time of Flight sensor ga. Hieronder ga ik 2 verschillende sensoren vergelijken die in het TI-lab te vinden zijn. 
 
-    |    Type               | GY530
+    |    Type               | GY530 | VL6180 |
     |-------------------|-------------|-|
-    | Operating Voltage (lower better) | 2.6v - 3.5v | |
-    | Supply-current (lower better) | 10mA |
-    | Min-range (lower better) | 3cm | |
-    | Max-range | 200cm |
-    | Output protocol | $I^2C$
-    | Output format | Millimeters |
-    | Resolution (lower better) | 0.03 mm/pb|
+    | Operating Voltage (lower better) | 2.6v - 3.5v | 2.6v - 3.0v |
+    | Supply-current (lower better) | 10mA | 1.7mA |
+    | Min-range (lower better) | 3cm | 1cm |
+    | Max-range | 200cm | 64cm |
+    | Output protocol | $I^2C$ | $I^2C$  
+    | Output format | Millimeters | Millimeters |
+    | Resolution (lower better) | 0.03 mm/pb | 0.39 mm/pb |
 
 
 
