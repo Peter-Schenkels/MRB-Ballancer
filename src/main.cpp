@@ -12,10 +12,10 @@
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 #define ever ;;
-#define WIPWAP_LENGTH 350
+#define WIPWAP_LENGTH 250
 #define SECOND_MS 1000
-#define MAX_SERVO 45
-#define MIN_SERVO 10
+#define MAX_SERVO 1100
+#define MIN_SERVO 700
 // #define DEBUG
 
 Servo servo;
@@ -24,8 +24,8 @@ int pot_pin = A3;
 int pot_value = 0;
 
 float P = 2;
-float I = 0.003;
-float D  = 0.2;
+float I = 0;
+float D = 0;
 
 SemaphoreHandle_t range_mutex = NULL;
 SemaphoreHandle_t angle_mutex = NULL;
@@ -38,7 +38,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 int current_range = 0;
 int current_angle = 0;
 int set_point_angle = (MAX_SERVO + MIN_SERVO) / 2 +150;
-int servo_speed_degree_per_second = 5;
+int servo_speed_degree_per_second = 2;
 int range_error;
 
 PID_properties present_pid;
@@ -49,6 +49,7 @@ void TaskSetServo( void *pvParameters );
 void TaskUpdatePID( void *pvParameters );
 void TaskReadPot( void *pvParameters );
 void TaskUpdateOled( void *pvParameters );
+void TaskTestServoRange( void *pvParameters );
 
 void InitTof()
 {
@@ -90,6 +91,7 @@ void TaskReadToF( void *pvParameters )
       if(lox.isRangeComplete())
       {
         uint16_t read_range = lox.readRange();
+        Serial.println(read_range);
         xQueueSend(range_queue, &read_range, portMAX_DELAY);
       }
     // Delay and let scheduler pick another task.
@@ -106,22 +108,33 @@ void TaskSetServo( void *pvParameters )
     {
       if(current_angle != set_point_angle)
       {
-        int speed = servo_speed_degree_per_second * ((float)task_length/(float)SECOND_MS);
-        speed = current_angle > set_point_angle ? speed : speed*-1;
-        current_angle = abs(speed + current_angle - set_point_angle) > abs(speed) ?  set_point_angle : current_angle + speed;
-        #ifdef DEBUG
-        char buffer[60];
-        snprintf(buffer, sizeof(buffer), "DPS:%u, SPEED:%d, ANGLE:%u, SET_POINT:%u", servo_speed_degree_per_second, speed, current_angle, set_point_angle);
-        Serial.println(buffer);
-        #endif // DEBUG
+        // int speed = servo_speed_degree_per_second * ((float)task_length/(float)SECOND_MS);
+        // #ifdef DEBUG
+        // char buffer[60];
+        // snprintf(buffer, sizeof(buffer), "DPS:%u, SPEED:%d, ANGLE:%u, SET_POINT:%u", servo_speed_degree_per_second, speed, current_angle, set_point_angle);
+        // Serial.println(buffer);
+        // #endif // DEBUG
+        int speed = current_angle > set_point_angle ? -1 : 1;
+        current_angle = abs(speed + current_angle - set_point_angle) < abs(speed) ?  set_point_angle : current_angle + speed;
         if(current_angle < MAX_SERVO && current_angle > MIN_SERVO)
         {
-          servo.write(current_angle);
+        
+          servo.writeMicroseconds(current_angle);
         }
       }
       xSemaphoreGive(angle_mutex);
     }
     vTaskDelay(task_length);
+  }
+}
+
+void TaskTestServoRange( void *pvParameters )
+{
+  for(uint16_t angle = 0; angle < 2000; angle++)
+  {
+    servo.writeMicroseconds(angle);
+    Serial.println(angle);
+    vTaskDelay(10);
   }
 }
 
@@ -149,7 +162,7 @@ void TaskUpdateOled( void *pvParameters )
 
 uint8_t postProcessSteeringAction(float steering_action)
 {
-  return ((steering_action + UINT8_MAX)/UINT8_MAX) * (MAX_SERVO - MIN_SERVO) + MIN_SERVO;
+  return ((MAX_SERVO + MIN_SERVO) / 2 + steering_action);
 }
 
 
@@ -187,6 +200,10 @@ void TaskUpdatePID( void *pvParameters )
           xSemaphoreGive(angle_mutex);
         }
       }
+      else
+      {
+        Serial.println("Current range was 0");
+      }
       // Reset read values.
       total_range = 0;
       total_queue_items = 0;
@@ -207,7 +224,6 @@ void TaskReadPot( void *pvParameters )
     // if(xSemaphoreTake(pot_value_mutex, 10) == pdTRUE)
     // {
     //   // pot_value = WIPWAP_LENGTH*UINT8_MAX/analogRead(pot_pin);
-    Serial.println(analogRead(pot_pin));
     //100
     present_pid.kp = float(analogRead(pot_pin))/400.f * -1;
     //   xSemaphoreGive(pot_value_mutex);
@@ -230,11 +246,12 @@ void InitRtos()
     Serial.println("Failed to init mutexes");
   }
   // Create Tasks for scheduler.
-  xTaskCreate(TaskReadToF,    "Read Time Of Flight",  4028, (void*)10 ,    2, NULL);
-  xTaskCreate(TaskSetServo,   "Set servo angle",      1048, (void*)100,    3, NULL);
-  xTaskCreate(TaskUpdatePID,  "Update PID",           1048, (void*)100,    3, NULL);
-  xTaskCreate(TaskReadPot,    "Read Pot Meter",       1028, (void*)500,    2, NULL);
-  xTaskCreate(TaskUpdateOled,  "Update Oled Screen",  4028, (void*)500,    2, NULL);
+  xTaskCreate(TaskReadToF,    "Read Time Of Flight",  2028, (void*)10,    1, NULL);
+  xTaskCreate(TaskSetServo,   "Set servo angle",      2048, (void*)20,    3, NULL);
+  xTaskCreate(TaskUpdatePID,  "Update PID",           2048, (void*)100,    3, NULL);
+  xTaskCreate(TaskReadPot,    "Read Pot Meter",       2028, (void*)500,    2, NULL);
+  // xTaskCreate(TaskUpdateOled,  "Update Oled Screen",  2028, (void*)500,    2, NULL);
+  // xTaskCreate(TaskTestServoRange,  "Servo raneg tester",  4028, NULL,    2, NULL);
 }
 
 void setup() {

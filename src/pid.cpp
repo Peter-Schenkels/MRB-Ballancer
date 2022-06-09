@@ -1,5 +1,5 @@
 #include <pid.hpp>
-#define DEBUG
+// #define DEBUG
 
 void setupPid(PID_properties & pid, float set_point, float kp, float ki, float kd)
 {
