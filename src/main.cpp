@@ -7,7 +7,6 @@
 #define SCREEN_HEIGHT 32 // OLED display height, in pixels
 #define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 #define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
-#define ever ;;
 #define WIPWAP_LENGTH 250
 #define MAX_SERVO 2130
 #define MIN_SERVO 900
@@ -18,7 +17,6 @@ Servo servo;
 
 uint8_t pot_pin = A3;
 uint16_t pot_value = 0;
-uint8_t power_tof_pin = 2;
 Ultrasonic ultrasonic(12, 13);
 
 float P =  2;
@@ -38,11 +36,8 @@ void setup() {
   while (! Serial){}
   digitalWrite(SDA, 0);
   digitalWrite(SCL, 0);
-
-  pinMode(power_tof_pin, OUTPUT);
   servo.writeMicroseconds((MIN_SERVO + MAX_SERVO)/2);
   servo.attach(9);    // Attach servo unit to pin 9
-    // ServoTest();
   setupPid(present_pid, WIPWAP_LENGTH/2, P, I, D);
   setupPid(last_pid, WIPWAP_LENGTH/2, P, I, D);
 }

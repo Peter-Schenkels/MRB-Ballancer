@@ -1,5 +1,7 @@
 #MRB Project: Ball Balancer
+#### Peter Schenkels
 
+![Project](project.jpg)
 ### Inleiding
 
 In dit document ga ik beknopt bespreken hoe ik een "Bal op plank" PID systeem heb ontworpen in elkaar heb gezet door uit te leggen welke sensoren en actuatoren ik gebruikt heb, hoe de software en hardware in elkaar zit, hoe ik de PID waardes heb ingesteld en welke ik gekoze heb en hoe goed het systeem uiteindelijk gewerkt heeft. 
@@ -109,5 +111,5 @@ Omdat de lengte van de baan zo klein is heeft het balletje minder speling en moe
 
 ### Conclusie
 
-Uiteindelijk is het wel gelukt om een relatief stabiel PID systeem te maken met alle complicaties die ik tijdens dit project tegen kwam. Nu ik alle jumper wires en lego van mijn bureau heb opgeruimd kan ik zeggen dat ik veel heb geleerd over hardware tijdens dit project. Vooral hoe je met bewegende onderdelen en hardware om moet gaan. Het kan af en toe frustrerend zijn maar dan kom je ook weer te weten dat: "Form follows function".
+Uiteindelijk is het wel gelukt om een relatief stabiel PID systeem te maken met alle complicaties die ik tijdens dit project tegen kwam. Nu ik alle jumper wires en lego van mijn bureau en de grond heb opgeruimd kan ik zeggen dat ik veel heb geleerd over hardware tijdens dit project. Vooral hoe je met bewegende onderdelen en hardware om moet gaan. Het kan af en toe frustrerend zijn maar dan kom je ook weer te weten dat: "Form follows function".
 
